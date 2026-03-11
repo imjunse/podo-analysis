@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=480">
+<title>PODO 온보딩 와이어프레임</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'gray-900': '#1C1C1C',
+        'gray-500': '#757575',
+        'gray-400': '#A5A5A5',
+        'gray-300': '#D6D6D6',
+        'gray-200': '#E8E8E8',
+        'gray-100': '#F5F5F5',
+        'podo-white': '#FBFBF9',
+        'podo-green': '#B5FD4C',
+        'green-500': '#6ABE36',
+        'green-300': '#9BEB26',
+        'green-100': '#F2FCEC',
+        'blue-500': '#6184FF',
+        'red-500': '#FD6771',
+      },
+      fontFamily: {
+        pretendard: ['Pretendard Variable', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  #app {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  .btn-primary {
+    background: #B5FD4C;
+    border: 2px solid #1C1C1C;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 0 #1C1C1C;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.48px;
+    padding: 14px 0;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.1s;
+    color: #1C1C1C;
+  }
+  .btn-primary:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+  .btn-primary:disabled {
+    background: #E8E8E8;
+    border-color: #E8E8E8;
+    box-shadow: 0 4px 0 0 #D6D6D6;
+    color: #A5A5A5;
+    cursor: not-allowed;
+  }
+  .selectable-card {
+    border: 2px solid #E8E8E8;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fff;
+  }
+  .selectable-card.selected {
+    border-color: #6ABE36;
+    background: #F2FCEC;
+  }
+  .stepper-segment {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: #E8E8E8;
+    transition: background 0.3s;
+  }
+  .stepper-segment.active {
+    background: #6ABE36;
+  }
+  .page { display: none; flex-direction: column; min-height: 100vh; }
+  .page.active { display: flex; }
+  .skip-link {
+    color: #A5A5A5;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .skip-link:hover { text-decoration: underline; }
+  .quiz-option {
+    border: 2px solid #E8E8E8;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fff;
+    text-align: left;
+    width: 100%;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: -0.3px;
+  }
+  .quiz-option.selected {
+    border-color: #6ABE36;
+    background: #F2FCEC;
+  }
+  .value-card {
+    background: #F5F5F5;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #F2FCEC;
+    border: 1px solid #6ABE36;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #6ABE36;
+  }
+  .time-chip {
+    border: 2px solid #E8E8E8;
+    border-radius: 12px;
+    padding: 12px 0;
+    text-align: center;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: #fff;
+    color: #1C1C1C;
+  }
+  .time-chip.selected {
+    border-color: #6ABE36;
+    background: #F2FCEC;
+  }
+  .time-chip.disabled {
+    background: #F5F5F5;
+    color: #D6D6D6;
+    cursor: not-allowed;
+  }
+  .date-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 56px;
+  }
+  .date-chip.selected {
+    border-color: #6ABE36;
+    background: #F2FCEC;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-up { animation: fadeInUp 0.4s ease both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ==================== STEP 1: 환영 + 언어 선택 ==================== -->
+<div class="page active" id="step1">
+  <div class="flex gap-1 px-5 pt-4 pb-2">
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+  </div>
+
+  <div class="flex-1 flex flex-col px-5 pt-8">
+    <div class="flex justify-center mb-6 fade-in-up">
+      <div style="width:64px; height:64px; background:#F2FCEC; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:32px;">&#x1F347;</div>
+    </div>
+
+    <h1 class="text-center text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] mb-2 fade-in-up delay-1">
+      반가워요!
+    </h1>
+    <p class="text-center text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] mb-10 fade-in-up delay-2">
+      어떤 언어를 배우고 싶으세요?
+    </p>
+
+    <div class="flex gap-3 fade-in-up delay-3" id="lang-cards">
+      <button class="selectable-card flex-1 flex flex-col items-center gap-3 py-6" onclick="selectLang('english', this)">
+        <div style="width:56px; height:56px; border-radius:14px; overflow:hidden; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:36px;">&#x1F1FA;&#x1F1F8;</div>
+        <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">영어</span>
+      </button>
+      <button class="selectable-card flex-1 flex flex-col items-center gap-3 py-6" onclick="selectLang('japanese', this)">
+        <div style="width:56px; height:56px; border-radius:14px; overflow:hidden; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:36px;">&#x1F1EF;&#x1F1F5;</div>
+        <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">일본어</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 2: 학습 목표 설정 ==================== -->
+<div class="page" id="step2">
+  <div class="flex gap-1 px-5 pt-4 pb-2">
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+  </div>
+
+  <div class="flex items-center px-5 py-3 relative">
+    <button onclick="goToStep(1)" class="text-gray-900" style="background:none; border:none; cursor:pointer; padding:4px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 flex flex-col px-5 pt-4">
+    <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] mb-2 fade-in-up">
+      <span id="lang-label-step2">영어</span>,<br>어떤 목표로 배우시나요?
+    </h1>
+    <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] mb-8 fade-in-up delay-1">
+      최대 2개까지 선택할 수 있어요.
+    </p>
+
+    <div class="flex flex-col gap-3" id="goal-cards">
+      <button class="selectable-card flex items-center gap-4 fade-in-up delay-1" onclick="toggleGoal(this, 'business')">
+        <div style="width:44px; height:44px; background:#F5F5F5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">&#x1F4BC;</div>
+        <div class="flex flex-col text-left">
+          <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">비즈니스/업무 회화</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">회의, 프레젠테이션, 이메일</span>
+        </div>
+      </button>
+      <button class="selectable-card flex items-center gap-4 fade-in-up delay-2" onclick="toggleGoal(this, 'travel')">
+        <div style="width:44px; height:44px; background:#F5F5F5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">&#x2708;&#xFE0F;</div>
+        <div class="flex flex-col text-left">
+          <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">여행/일상 회화</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">여행, 카페, 일상 대화</span>
+        </div>
+      </button>
+      <button class="selectable-card flex items-center gap-4 fade-in-up delay-2" onclick="toggleGoal(this, 'exam')">
+        <div style="width:44px; height:44px; background:#F5F5F5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">&#x1F4DA;</div>
+        <div class="flex flex-col text-left">
+          <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">시험 준비</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">토익 스피킹, 오픽, JLPT</span>
+        </div>
+      </button>
+      <button class="selectable-card flex items-center gap-4 fade-in-up delay-3" onclick="toggleGoal(this, 'hobby')">
+        <div style="width:44px; height:44px; background:#F5F5F5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">&#x1F3AF;</div>
+        <div class="flex flex-col text-left">
+          <span class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px]">자기계발/취미</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">영화, 음악, 자기개발</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="px-5 pb-5 pt-3">
+    <button class="btn-primary" id="step2-btn" disabled onclick="goToStep(3)">다음</button>
+  </div>
+</div>
+
+<!-- ==================== STEP 3: 간이 레벨 진단 ==================== -->
+<div class="page" id="step3">
+  <div class="flex gap-1 px-5 pt-4 pb-2">
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment"></div>
+    <div class="stepper-segment"></div>
+  </div>
+
+  <div class="flex items-center px-5 py-3 relative">
+    <button onclick="goToStep(2)" class="text-gray-900" style="background:none; border:none; cursor:pointer; padding:4px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 flex flex-col px-5 pt-4">
+    <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] mb-2 fade-in-up">
+      실력에 딱 맞는 수업을<br>추천해드릴게요
+    </h1>
+    <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] mb-8 fade-in-up delay-1">
+      간단한 3문항이에요. 부담 없이 풀어보세요!
+    </p>
+
+    <div class="flex items-center gap-2 mb-6 fade-in-up delay-1">
+      <div id="quiz-progress" class="flex gap-1.5">
+        <div class="w-8 h-1 rounded-full" style="background:#6ABE36;"></div>
+        <div class="w-8 h-1 rounded-full bg-gray-200" id="qp-2"></div>
+        <div class="w-8 h-1 rounded-full bg-gray-200" id="qp-3"></div>
+      </div>
+      <span class="text-[13px] text-gray-400 leading-[18px]" id="quiz-counter">1 / 3</span>
+    </div>
+
+    <div id="quiz-q1" class="flex flex-col gap-3 fade-in-up delay-2">
+      <p class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px] mb-2">
+        다음 중 가장 자연스러운 인사는?
+      </p>
+      <button class="quiz-option" onclick="answerQuiz(1, this, 'a')">Hello, nice to meet you.</button>
+      <button class="quiz-option" onclick="answerQuiz(1, this, 'b')">I'm glad to make your acquaintance.</button>
+      <button class="quiz-option" onclick="answerQuiz(1, this, 'c')">Hey there, how's it going?</button>
+      <button class="quiz-option" onclick="answerQuiz(1, this, 'd')">It's a pleasure. I've heard a lot about you.</button>
+    </div>
+
+    <div id="quiz-q2" class="flex flex-col gap-3" style="display:none;">
+      <p class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px] mb-2">
+        "Could you break that down for me?"<br>이 문장의 의미는?
+      </p>
+      <button class="quiz-option" onclick="answerQuiz(2, this, 'a')">그거 부숴줄 수 있어?</button>
+      <button class="quiz-option" onclick="answerQuiz(2, this, 'b')">좀 더 쉽게 설명해줄 수 있어?</button>
+      <button class="quiz-option" onclick="answerQuiz(2, this, 'c')">나한테 나눠줄 수 있어?</button>
+      <button class="quiz-option" onclick="answerQuiz(2, this, 'd')">그거 분리해줄 수 있어?</button>
+    </div>
+
+    <div id="quiz-q3" class="flex flex-col gap-3" style="display:none;">
+      <p class="text-[16px] font-semibold text-gray-900 leading-6 tracking-[-0.32px] mb-2">
+        회의에서 반대 의견을 말할 때<br>가장 적절한 표현은?
+      </p>
+      <button class="quiz-option" onclick="answerQuiz(3, this, 'a')">No, you're wrong.</button>
+      <button class="quiz-option" onclick="answerQuiz(3, this, 'b')">I don't think so.</button>
+      <button class="quiz-option" onclick="answerQuiz(3, this, 'c')">I see your point, but I'd like to offer a different perspective.</button>
+      <button class="quiz-option" onclick="answerQuiz(3, this, 'd')">That's not right at all.</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 4: 맞춤 결과 + 서비스 가치 ==================== -->
+<div class="page" id="step4">
+  <div class="flex gap-1 px-5 pt-4 pb-2">
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment"></div>
+  </div>
+
+  <div class="flex-1 flex flex-col px-5 pt-8">
+    <div class="flex flex-col items-center mb-10 fade-in-up">
+      <div style="width:72px; height:72px; background:#F2FCEC; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:16px;">&#x1F389;</div>
+      <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] text-center mb-3">
+        <span id="user-name">회원</span>님의 영어 레벨은
+      </h1>
+      <div class="level-badge mb-3" id="result-level">중급 (STEP 3)</div>
+      <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] text-center" id="result-goal-msg">
+        비즈니스 회화 목표에 딱 맞는 수업이 준비되어 있어요!
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-3 mb-6">
+      <h2 class="text-[16px] font-bold text-gray-900 leading-6 tracking-[-0.32px] fade-in-up delay-1">
+        포도스피킹은 이렇게 달라요
+      </h2>
+
+      <div class="value-card fade-in-up delay-1">
+        <div style="width:40px; height:40px; background:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">&#x1F3AF;</div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[15px] font-bold text-gray-900 leading-[22px] tracking-[-0.3px]">레벨에 맞는 1:1 튜터 매칭</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">내 실력에 꼭 맞는 전문 튜터가 배정돼요</span>
+        </div>
+      </div>
+
+      <div class="value-card fade-in-up delay-2">
+        <div style="width:40px; height:40px; background:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">&#x1F4CA;</div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[15px] font-bold text-gray-900 leading-[22px] tracking-[-0.3px]">매 수업 후 AI 리포트</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">수업 내용을 분석해서 성장을 확인해요</span>
+        </div>
+      </div>
+
+      <div class="value-card fade-in-up delay-3">
+        <div style="width:40px; height:40px; background:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">&#x1F504;</div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[15px] font-bold text-gray-900 leading-[22px] tracking-[-0.3px]">예습 - 수업 - 복습 사이클</span>
+          <span class="text-[13px] text-gray-500 leading-[18px] tracking-[-0.26px]">체계적인 학습 루틴으로 실력이 올라요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-5 pb-5 pt-3">
+    <button class="btn-primary" onclick="goToStep(5)">무료 체험 시작하기</button>
+  </div>
+</div>
+
+<!-- ==================== STEP 5: 무료 체험 레슨 예약 ==================== -->
+<div class="page" id="step5">
+  <div class="flex gap-1 px-5 pt-4 pb-2">
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+    <div class="stepper-segment active"></div>
+  </div>
+
+  <div class="flex items-center px-5 py-3 relative">
+    <button onclick="goToStep(4)" class="text-gray-900" style="background:none; border:none; cursor:pointer; padding:4px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#1C1C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 flex flex-col px-5 pt-4">
+    <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] mb-2 fade-in-up">
+      첫 수업을 예약해볼까요?
+    </h1>
+    <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] mb-2 fade-in-up delay-1">
+      <span id="result-level-label" class="font-semibold" style="color:#6ABE36;">중급</span> 레벨 수업이 추천돼요
+      <button onclick="goToStep(3)" style="background:none; border:none; cursor:pointer; text-decoration:underline; color:#6184FF; font-size:13px; margin-left:4px;">변경</button>
+    </p>
+
+    <div class="flex gap-2 mb-5 mt-4 fade-in-up delay-1" id="date-chips">
+      <button class="date-chip selected" onclick="selectDate(0, this)">
+        <span class="text-[12px] text-gray-500 leading-[16px]">오늘</span>
+        <span class="text-[18px] font-bold text-gray-900 leading-[24px]">10</span>
+      </button>
+      <button class="date-chip" onclick="selectDate(1, this)">
+        <span class="text-[12px] text-gray-500 leading-[16px]">내일</span>
+        <span class="text-[18px] font-bold text-gray-900 leading-[24px]">11</span>
+      </button>
+      <button class="date-chip" onclick="selectDate(2, this)">
+        <span class="text-[12px] text-gray-500 leading-[16px]">수</span>
+        <span class="text-[18px] font-bold text-gray-900 leading-[24px]">12</span>
+      </button>
+      <button class="date-chip" onclick="selectDate(3, this)">
+        <span class="text-[12px] text-gray-500 leading-[16px]">목</span>
+        <span class="text-[18px] font-bold text-gray-900 leading-[24px]">13</span>
+      </button>
+    </div>
+
+    <div class="mb-3 fade-in-up delay-2">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-[13px] text-gray-400 tracking-[-0.26px]">오전</span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
+          <span class="text-[12px] text-gray-400">마감</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button class="time-chip" onclick="selectTime(this)">10:00</button>
+        <button class="time-chip disabled" disabled>10:30</button>
+        <button class="time-chip" onclick="selectTime(this)">11:00</button>
+        <button class="time-chip disabled" disabled>11:30</button>
+      </div>
+    </div>
+
+    <div class="mb-6 fade-in-up delay-2">
+      <span class="text-[13px] text-gray-400 tracking-[-0.26px] mb-3 block">오후</span>
+      <div class="grid grid-cols-3 gap-2">
+        <button class="time-chip" onclick="selectTime(this)">12:00</button>
+        <button class="time-chip" onclick="selectTime(this)">12:30</button>
+        <button class="time-chip" onclick="selectTime(this)">13:00</button>
+        <button class="time-chip disabled" disabled>13:30</button>
+        <button class="time-chip" onclick="selectTime(this)">14:00</button>
+        <button class="time-chip" onclick="selectTime(this)">14:30</button>
+        <button class="time-chip disabled" disabled>15:00</button>
+        <button class="time-chip" onclick="selectTime(this)">15:30</button>
+        <button class="time-chip" onclick="selectTime(this)">16:00</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-5 pb-5 pt-3 flex flex-col gap-3">
+    <button class="btn-primary" id="step5-btn" disabled onclick="completeOnboarding()">예약하기</button>
+    <button class="skip-link text-center pb-2" onclick="skipToHome()" style="background:none; border:none;">나중에 할게요</button>
+  </div>
+</div>
+
+<!-- ==================== 완료 화면 ==================== -->
+<div class="page" id="complete">
+  <div class="flex-1 flex flex-col items-center justify-center px-5">
+    <div style="width:100px; height:100px; background:#F2FCEC; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:24px;" class="fade-in-up">&#x2705;</div>
+    <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] text-center mb-3 fade-in-up delay-1">
+      체험 레슨이 예약됐어요!
+    </h1>
+    <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] text-center mb-2 fade-in-up delay-2" id="complete-schedule">
+      3월 10일 (월) 10:00
+    </p>
+    <div class="level-badge mt-1 mb-8 fade-in-up delay-2" id="complete-level">중급 &#183; 영어</div>
+
+    <div class="w-full bg-gray-100 rounded-2xl p-5 fade-in-up delay-3">
+      <p class="text-[14px] font-semibold text-gray-900 leading-[20px] tracking-[-0.28px] mb-3">수업 전에 이것만 확인하세요</p>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-[13px]">&#x1F4F1;</span>
+          <span class="text-[13px] text-gray-500 leading-[18px]">태블릿 또는 PC에서 수업을 진행해요</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[13px]">&#x1F3A7;</span>
+          <span class="text-[13px] text-gray-500 leading-[18px]">이어폰/헤드셋을 준비해주세요</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[13px]">&#x1F4D6;</span>
+          <span class="text-[13px] text-gray-500 leading-[18px]">예습 자료가 수업 전에 안내돼요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-5 pb-5 pt-3">
+    <button class="btn-primary" onclick="alert('홈 화면으로 이동!')">홈으로 이동</button>
+  </div>
+</div>
+
+<!-- ==================== 스킵 완료 화면 ==================== -->
+<div class="page" id="skip-complete">
+  <div class="flex-1 flex flex-col items-center justify-center px-5">
+    <div style="width:100px; height:100px; background:#F2FCEC; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:24px;" class="fade-in-up">&#x1F44B;</div>
+    <h1 class="text-[22px] font-bold text-gray-900 leading-[30px] tracking-[-0.44px] text-center mb-3 fade-in-up delay-1">
+      온보딩 완료!
+    </h1>
+    <p class="text-[15px] text-gray-500 leading-[22px] tracking-[-0.3px] text-center mb-8 fade-in-up delay-2">
+      홈 화면에서 언제든지 무료 체험 레슨을 예약할 수 있어요.
+    </p>
+
+    <div class="w-full rounded-2xl border-2 bg-green-100 p-4 flex items-center gap-3 fade-in-up delay-3" style="cursor:pointer; border-color:#6ABE36;">
+      <div style="width:44px; height:44px; background:#fff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">&#x1F347;</div>
+      <div class="flex-1">
+        <span class="text-[15px] font-bold text-gray-900 leading-[22px] tracking-[-0.3px]">무료 체험 레슨 예약하기</span>
+        <span class="text-[13px] text-gray-500 leading-[18px] block">레벨에 맞는 1:1 수업을 경험해보세요</span>
+      </div>
+      <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="#6ABE36" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <p class="text-[12px] text-gray-400 mt-3 text-center">&#x2191; 홈 화면 상단에 이 배너가 표시돼요</p>
+  </div>
+
+  <div class="px-5 pb-5 pt-3">
+    <button class="btn-primary" onclick="alert('홈 화면으로 이동!')">홈으로 이동</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+var state = {
+  language: null,
+  goals: [],
+  quizStep: 0,
+  quizAnswers: [],
+  diagnosedLevel: null,
+  selectedDate: 0,
+  selectedTime: null
+}
+
+function goToStep(n) {
+  var pages = document.querySelectorAll('.page')
+  for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active') }
+  document.getElementById('step' + n).classList.add('active')
+  window.scrollTo(0, 0)
+}
+
+function selectLang(lang, el) {
+  state.language = lang
+  var cards = document.querySelectorAll('#lang-cards .selectable-card')
+  for (var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected') }
+  el.classList.add('selected')
+  document.getElementById('lang-label-step2').textContent = lang === 'english' ? '영어' : '일본어'
+  setTimeout(function() { goToStep(2) }, 400)
+}
+
+function toggleGoal(el, goal) {
+  var idx = state.goals.indexOf(goal)
+  if (idx > -1) {
+    state.goals.splice(idx, 1)
+    el.classList.remove('selected')
+  } else {
+    if (state.goals.length >= 2) {
+      var removed = state.goals.shift()
+      var allCards = document.querySelectorAll('#goal-cards .selectable-card')
+      var goalIds = ['business','travel','exam','hobby']
+      for (var i = 0; i < allCards.length; i++) {
+        if (goalIds[i] === removed) { allCards[i].classList.remove('selected') }
+      }
+    }
+    state.goals.push(goal)
+    el.classList.add('selected')
+  }
+  document.getElementById('step2-btn').disabled = state.goals.length === 0
+}
+
+function answerQuiz(qNum, el, answer) {
+  state.quizAnswers.push(answer)
+  var options = el.parentElement.querySelectorAll('.quiz-option')
+  for (var i = 0; i < options.length; i++) { options[i].classList.remove('selected') }
+  el.classList.add('selected')
+
+  setTimeout(function() {
+    if (qNum < 3) {
+      document.getElementById('quiz-q' + qNum).style.display = 'none'
+      var nextQ = document.getElementById('quiz-q' + (qNum + 1))
+      nextQ.style.display = 'flex'
+      nextQ.classList.add('fade-in-up')
+      var prog = document.getElementById('qp-' + (qNum + 1))
+      prog.classList.remove('bg-gray-200')
+      prog.style.background = '#6ABE36'
+      document.getElementById('quiz-counter').textContent = (qNum + 1) + ' / 3'
+    } else {
+      diagnoseLevel()
+      goToStep(4)
+    }
+  }, 500)
+}
+
+function diagnoseLevel() {
+  var scores = { a: 1, b: 2, c: 3, d: 4 }
+  var total = 0
+  for (var i = 0; i < state.quizAnswers.length; i++) {
+    total += (scores[state.quizAnswers[i]] || 0)
+  }
+
+  if (total <= 4) { state.diagnosedLevel = { name: '초급', step: 'STEP 1' } }
+  else if (total <= 7) { state.diagnosedLevel = { name: '중급', step: 'STEP 3' } }
+  else if (total <= 10) { state.diagnosedLevel = { name: '중고급', step: 'STEP 4' } }
+  else { state.diagnosedLevel = { name: '고급', step: 'STEP 5' } }
+
+  document.getElementById('result-level').textContent = state.diagnosedLevel.name + ' (' + state.diagnosedLevel.step + ')'
+  document.getElementById('result-level-label').textContent = state.diagnosedLevel.name
+  var langLabel = state.language === 'english' ? '영어' : '일본어'
+  document.getElementById('complete-level').textContent = state.diagnosedLevel.name + ' \u00B7 ' + langLabel
+
+  var goalNames = { business: '비즈니스 회화', travel: '여행/일상 회화', exam: '시험 준비', hobby: '자기계발' }
+  var goalTexts = []
+  for (var i = 0; i < state.goals.length; i++) { goalTexts.push(goalNames[state.goals[i]]) }
+  document.getElementById('result-goal-msg').textContent = goalTexts.join(', ') + ' 목표에 딱 맞는 수업이 준비되어 있어요!'
+}
+
+function selectDate(idx, el) {
+  state.selectedDate = idx
+  state.selectedTime = null
+  var chips = document.querySelectorAll('.date-chip')
+  for (var i = 0; i < chips.length; i++) { chips[i].classList.remove('selected') }
+  el.classList.add('selected')
+  var timeChips = document.querySelectorAll('.time-chip')
+  for (var i = 0; i < timeChips.length; i++) { timeChips[i].classList.remove('selected') }
+  document.getElementById('step5-btn').disabled = true
+}
+
+function selectTime(el) {
+  state.selectedTime = el.textContent
+  var timeChips = document.querySelectorAll('.time-chip:not(.disabled)')
+  for (var i = 0; i < timeChips.length; i++) { timeChips[i].classList.remove('selected') }
+  el.classList.add('selected')
+  document.getElementById('step5-btn').disabled = false
+}
+
+function completeOnboarding() {
+  var dateLabels = ['3월 10일 (월)', '3월 11일 (화)', '3월 12일 (수)', '3월 13일 (목)']
+  document.getElementById('complete-schedule').textContent = dateLabels[state.selectedDate] + ' ' + state.selectedTime
+
+  var pages = document.querySelectorAll('.page')
+  for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active') }
+  document.getElementById('complete').classList.add('active')
+  window.scrollTo(0, 0)
+}
+
+function skipToHome() {
+  var pages = document.querySelectorAll('.page')
+  for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active') }
+  document.getElementById('skip-complete').classList.add('active')
+  window.scrollTo(0, 0)
+}
+</script>
+</body>
+</html>
