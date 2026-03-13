@@ -45,21 +45,33 @@ tags:
 
 ## 2. 월별 상세
 
-| 지표               |  **합계** |    1월 |    2월 | 3월(~4일) |
-| ---------------- | ------: | ----: | ----: | ------: |
-| **회원가입수**        | 7,452   | 3,487 | 3,590 |     375 |
-| **무료체험 결제수(신청)** | 5,773   | 2,818 | 2,655 |     300 |
-| **체험 완료수**       | 2,927   | 1,446 | 1,302 |     179 |
+| 지표               | **합계** |    1월 |    2월 | 3월(~4일) |
+| ---------------- | -----: | ----: | ----: | ------: |
+| **회원가입수**        |  7,452 | 3,487 | 3,590 |     375 |
+| **무료체험 결제수(신청)** |  5,773 | 2,818 | 2,655 |     300 |
+| **체험 완료수**       |  2,927 | 1,446 | 1,302 |     179 |
 
 ### 월별 전환율
 
-| 전환 단계            |    1월 |    2월 | 3월(~4일) |
-| ----------------- | ----: | ----: | ------: |
-| 가입 → 체험결제       | 80.8% | 73.9% |  80.0%  |
-| 체험결제 → 체험완료     | 51.3% | 49.0% |  59.7%  |
-| 가입 → 체험완료       | 41.5% | 36.3% |  47.7%  |
+| 전환 단계       |    1월 |    2월 | 3월(~4일) |
+| ----------- | ----: | ----: | ------: |
+| 가입 → 체험결제   | 80.8% | 73.9% |   80.0% |
+| 체험결제 → 체험완료 | 51.3% | 49.0% |   59.7% |
+| 가입 → 체험완료   | 41.5% | 36.3% |   47.7% |
 
 > **참고**: 3월은 4일까지의 데이터로, 표본이 적어 전환율 변동폭이 큼
+
+### 유저 기반(코호트) 전환율
+
+위 월별 전환율은 **날짜 스냅샷 기반** (각 테이블의 날짜 컬럼으로 월별 집계)이므로, 1월 가입자가 2월에 체험결제하면 1월 가입수/2월 결제수에 각각 잡힌다. 아래는 **가입월 기준 코호트**로, 해당 월 가입자가 분석 기간 내 전환한 비율을 계산한 것이다.
+
+| 전환 단계       |    1월 |    2월 | 3월(~4일) |
+| ----------- | ----: | ----: | ------: |
+| 가입 → 체험결제   | 67.0% | 65.0% |   65.6% |
+| 체험결제 → 체험완료 | 52.1% | 50.3% |   58.5% |
+| 가입 → 체험완료   | 34.9% | 32.7% |   38.4% |
+
+> **스냅샷 기반과 차이가 나는 이유**: 스냅샷은 각 테이블의 날짜 컬럼으로 월별 집계하므로, 1월 가입자가 2월에 체험결제하면 1월 가입수/2월 결제수에 각각 잡힌다. 코호트는 가입월에 귀속되므로 가입→체험결제 전환율이 스냅샷(77.5%) 대비 코호트(65.9%)에서 낮게 나타난다 — 가입 후 체험결제까지 월을 넘기는 유저가 스냅샷에서는 각각 다른 월에 집계되어 전환율이 높아 보이는 효과.
 
 ---
 
@@ -174,6 +186,54 @@ WHERE CLASS_TYPE = 'PODO'
   AND DATE(ORG_CLASS_DATETIME) BETWEEN '2026-01-01' AND '2026-03-04'
 GROUP BY DATE_FORMAT(ORG_CLASS_DATETIME, '%Y-%m')
 ORDER BY month
+```
+
+### 유저 기반(코호트) 체험결제 전환
+```sql
+SELECT
+  DATE_FORMAT(u.CREATE_DATE, '%Y-%m') AS signup_month,
+  COUNT(DISTINCT u.ID) AS signup_count,
+  COUNT(DISTINCT p.USER_UID) AS trial_payment_count,
+  ROUND(COUNT(DISTINCT p.USER_UID) / COUNT(DISTINCT u.ID) * 100, 1) AS conversion_rate
+FROM GT_USER u
+LEFT JOIN GT_PAYMENT_INFO p
+  ON u.ID = p.USER_UID
+  AND p.CLASS_TYPE = 'PODO'
+  AND p.PAY_METHOD NOT IN ('admin')
+  AND p.PAYMENT_DIV = 'T'
+  AND DATE(p.UPDATE_DATE) BETWEEN '2026-01-01' AND '2026-03-04'
+WHERE u.CLASS_TYPE = 'PODO'
+  AND DATE(u.CREATE_DATE) BETWEEN '2026-01-01' AND '2026-03-04'
+  AND u.REAL_NAME NOT LIKE '%QA_%'
+  AND u.EMAIL NOT LIKE '%@podo.com'
+  AND u.PHONE != '00000000000'
+  AND u.CREATE_DATE > '2024-03-19 19:00:00'
+GROUP BY DATE_FORMAT(u.CREATE_DATE, '%Y-%m')
+ORDER BY signup_month
+```
+
+### 유저 기반(코호트) 체험완료 전환
+```sql
+SELECT
+  DATE_FORMAT(u.CREATE_DATE, '%Y-%m') AS signup_month,
+  COUNT(DISTINCT u.ID) AS signup_count,
+  COUNT(DISTINCT c.STUDENT_USER_ID) AS trial_complete_count,
+  ROUND(COUNT(DISTINCT c.STUDENT_USER_ID) / COUNT(DISTINCT u.ID) * 100, 1) AS conversion_rate
+FROM GT_USER u
+LEFT JOIN GT_CLASS c
+  ON u.ID = c.STUDENT_USER_ID
+  AND c.CLASS_TYPE = 'PODO'
+  AND c.CITY = 'PODO_TRIAL'
+  AND c.CREDIT = 2
+  AND DATE(c.ORG_CLASS_DATETIME) BETWEEN '2026-01-01' AND '2026-03-04'
+WHERE u.CLASS_TYPE = 'PODO'
+  AND DATE(u.CREATE_DATE) BETWEEN '2026-01-01' AND '2026-03-04'
+  AND u.REAL_NAME NOT LIKE '%QA_%'
+  AND u.EMAIL NOT LIKE '%@podo.com'
+  AND u.PHONE != '00000000000'
+  AND u.CREATE_DATE > '2024-03-19 19:00:00'
+GROUP BY DATE_FORMAT(u.CREATE_DATE, '%Y-%m')
+ORDER BY signup_month
 ```
 
 ### 주요 필터 기준
