@@ -100,6 +100,12 @@ The January incentive's problem: **monthly cadence → failed to build habits**.
 
 **Enhancement:** Rather than absolute milestone targets, consider **"this week vs. last week" personal growth-based bonuses**. Rewarding relative increases motivates smaller tutors as well.
 
+**ROI Analysis (based on refund data):**
+- Investment: ~₩2.3M/month (based on January incentive results)
+- Expected recovery: Confirmed booking-related JP refunds run at ₩3–5M/month (see [[Refund Data Analysis (2025.10-2026.03)]]). This is a conservative keyword-matching estimate; actual scale is estimated at 2–3x (₩6–15M/month)
+- **₩2.3M investment vs. ₩3–15M in preventable refund losses → ROI of 1.3x – 6.5x**
+- Additional silent churn prevention (non-renewal) not included in this calculation
+
 ### Solution 3: Available Slot Pre-Notification
 
 > Difficulty: Low | Timeline: ~1 week | Expected Impact: Medium-High
@@ -132,6 +138,8 @@ Manually tested method with a **50% success rate**.
 - 50% success rate was from manual outreach. Automation will likely reduce this
 - Tutors will recognize the pattern over time — effective lifespan estimated at 2–3 months
 - Switching from fixed 5 PM detection to **real-time triggers on full booking events** would improve effectiveness (but increases dev cost)
+
+**Positioning:** The 2–3 month effective lifespan aligns with the Level Up curriculum launch (expected April–May). **Explicitly position this as a bridge solution until Level Up launches**, then naturally transition to non-bilingual tutor expansion.
 
 ### Solution 5: Add "Emotional Friction" to Class Cancellation
 
@@ -308,8 +316,11 @@ When Harim's team's beginner curriculum is complete → connect the third option
 | Priority | Solution | Difficulty | Expected Impact |
 |----------|----------|-----------|----------------|
 | 1 | Waitlist + notifications (with priority booking) | Low | High |
-| 2 | Weekly consistency bonus (personal growth-based) | Non-dev | High |
+| 2 | Weekly consistency bonus (personal growth-based, ROI 1.3–6.5x) | Non-dev | High |
 | 3 | Available slot pre-notification | Low | Medium-High |
+| - | Booking failure event logging (parallel with Tier 1) | Low | Measurement infra |
+
+> **Booking Failure Event Logging:** Current refund analysis relies on keyword matching in ticket content, which has low accuracy (see [[Refund Data Analysis (2025.10-2026.03)]]). Logging a "fully booked — booking failed" event on the reservation screen enables (1) precise measurement of Solutions 1–4's effectiveness and (2) quantification of the true full-booking rate. This is a single event addition to the existing logging pipeline — minimal dev effort.
 
 ### Tier 2: Execute within 2–3 weeks
 
@@ -337,9 +348,13 @@ When Harim's team's beginner curriculum is complete → connect the third option
 
 **Start #1, #2, and #3 simultaneously** for tangible impact within 2 weeks.
 - Solution 1 (Waitlist) = Student-side churn prevention
-- Solution 2 (Weekly bonus) = Tutor-side supply increase
+- Solution 2 (Weekly bonus) = Tutor-side supply increase (ROI 1.3–6.5x)
 - Solution 3 (Pre-notification) = Reduce the "booking failure" experience itself
+- Booking failure logging = Measurement infrastructure for all of the above
 
 These three work **on both sides (student + tutor) simultaneously**.
 
 Solution 5 (Reassurance option) integrates naturally into Solution 1. Actual non-bilingual lesson matching should proceed only after the new curriculum launches.
+
+> [!warning] March Urgency (as of 2026-03-24)
+> March is only 3 weeks in but booking-related JP refunds have already hit ₩5.0M — **on pace for the highest monthly total**. Per-case refund amounts are also trending upward (high-value package users beginning to churn). This is not "execute within 1–2 weeks" — this requires **immediate action**. Detailed data: [[Refund Data Analysis (2025.10-2026.03)]]
